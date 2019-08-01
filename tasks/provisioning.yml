@@ -1,0 +1,10 @@
+---
+# tasks file for ansible_traefik - provisioning
+
+- name: Create folder for compose files
+  file: 
+    path: "{{ traefik_compose_path }}"
+    state: directory
+    recurse: yes
+    owner: "root"
+    group: "root"

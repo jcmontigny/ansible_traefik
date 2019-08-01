@@ -1,0 +1,8 @@
+---
+# vars file for ansible_traefik
+
+# URL to get the traefik compose file (dockerswarm.rocks) - host mode (listen on 80/443 directly)
+traefik_compose_url: http://dockerswarm.rocks/traefik-host.yml
+
+# Name of the stack to deploy (hardocded into the dockerswarm.rocks compose file)
+traefik_stack_name: traefik-consul

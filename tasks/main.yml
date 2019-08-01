@@ -1,0 +1,8 @@
+---
+# tasks file for ansible_traefik
+
+- include_tasks: provisioning.yml
+  when: "inventory_hostname == groups[traefik_swarm_managers_ansible_group][0]"
+
+- include_tasks: deployment.yml
+  when: "inventory_hostname == groups[traefik_swarm_managers_ansible_group][0]"

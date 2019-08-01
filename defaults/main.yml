@@ -1,0 +1,37 @@
+---
+# defaults file for ansible_traefik
+
+# REQUIRED VARIABLES WITH NO DEFAULT VALUE
+
+# The ansible group containing the managers.
+# You need to define it to suit your needs.
+# Example : 
+# traefik_swarm_managers_ansible_group: swarm_managers
+
+# Your email address for the generation of letsencrypt certificates, example :
+# traefik_letsencrypt_email: admin@example.com
+
+# Your domain name ; traefik UI will be available at traefik.domain 
+# and consul UI at consul.domain
+# example :
+# traefik_domain: sys.example.com
+
+# --------------------------------------
+# OPTIONAL VARIABLES WITH DEFAULT VALUES
+
+# Admin user name to access traefik and consul (basic http auth)
+traefik_admin_user: admin
+traefik_admin_password: _changeme_
+
+# Number of traefik and consul replicas
+traefik_traefik_replica_count: 3
+traefik_consul_replica_count: 3
+
+# Path to downloaded compose files
+traefik_compose_path: /docker/compose_files
+
+# Name of the traefik compose file
+traefik_compose_file: docker-compose-traefik.yml
+
+# Name of the overlay network for traefik
+traefik_network_overlay: traefik-public

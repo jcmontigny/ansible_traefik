@@ -1,0 +1,44 @@
+---
+# tasks file for ansible_traefik - deployment
+
+- name: Download the docker-compose stack to the first manager node
+  get_url:
+    url: "{{ traefik_compose_url }}"
+    dest: "{{ traefik_compose_path }}/{{ traefik_compose_file }}"
+    mode: '0440'
+
+- name: Register the list of existing overlay networks
+  command: docker network ls --filter 'driver=overlay'
+  changed_when: False
+  register: traefik_overlay_networks
+
+- name: Create the traefik overlay network
+  command: "docker network create --driver=overlay {{ traefik_network_overlay }}"
+  when: "traefik_overlay_networks.stdout.find('{{ traefik_network_overlay }}') == -1"
+
+- name: Hash the password of the admin user and register openssl output
+  command: "openssl passwd -apr1 {{ traefik_admin_password }}"
+  changed_when: False
+  register: traefik_hashed_password_output
+
+- name: Set fact with the username hashed password
+  set_fact:
+    traefik_hashed_password: traefik_hashed_password_output.stdout
+
+- name: Register the list of existing stacks
+  command: docker stack ls
+  changed_when: False
+  register: traefik_swarm_stacks
+
+- name: Deploy traefik stack 
+  command: "docker stack deploy -c {{ traefik_compose_path }}/{{ traefik_compose_file }} {{ traefik_stack_name }}"
+  environment:
+    - EMAIL: "{{ traefik_letsencrypt_email }}"
+    - DOMAIN: "{{ traefik_domain }}"
+    - USERNAME: "{{ traefik_admin_user }}"
+    - PASSWORD: "{{ traefik_admin_password }}"
+    - HASHED_PASSWORD: "{{ traefik_hashed_password }}"
+    - CONSUL_REPLICAS: "{{ traefik_traefik_replica_count }}"
+    - TRAEFIK_REPLICAS: "{{ traefik_consul_replica_count }}"
+  when: "traefik_swarm_stacks.stdout.find('{{ traefik_stack_name }}') == -1"
+  
