@@ -14,7 +14,7 @@
 
 - name: Create the traefik overlay network
   command: "docker network create --driver=overlay {{ traefik_network_overlay }}"
-  when: "traefik_overlay_networks.stdout.find('{{ traefik_network_overlay }}') == -1"
+  when: "traefik_overlay_networks.stdout.find(traefik_network_overlay) == -1"
 
 - name: Hash the password of the admin user and register openssl output
   command: "openssl passwd -apr1 {{ traefik_admin_password }}"
@@ -40,5 +40,5 @@
     - HASHED_PASSWORD: "{{ traefik_hashed_password }}"
     - CONSUL_REPLICAS: "{{ traefik_traefik_replica_count }}"
     - TRAEFIK_REPLICAS: "{{ traefik_consul_replica_count }}"
-  when: "traefik_swarm_stacks.stdout.find('{{ traefik_stack_name }}') == -1"
+  when: "traefik_swarm_stacks.stdout.find(traefik_stack_name) == -1"
   
