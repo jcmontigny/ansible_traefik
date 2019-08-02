@@ -25,11 +25,6 @@
   set_fact:
     traefik_hashed_password: traefik_hashed_password_output.stdout
 
-# - name: Register the list of existing stacks
-#   command: docker stack ls
-#   changed_when: False
-#   register: traefik_swarm_stacks
-
 - name: Deploy traefik stack 
   command: "docker stack deploy -c {{ traefik_stack_path }}/{{ traefik_stack_file }} {{ traefik_stack_name }}"
   environment:
@@ -40,5 +35,4 @@
     - HASHED_PASSWORD: "{{ traefik_hashed_password }}"
     - CONSUL_REPLICAS: "{{ traefik_traefik_replica_count }}"
     - TRAEFIK_REPLICAS: "{{ traefik_consul_replica_count }}"
-#   when: "traefik_swarm_stacks.stdout.find(traefik_stack_name) == -1"
   
