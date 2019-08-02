@@ -28,7 +28,7 @@ Optional variables
 - `traefik_stack_file` : file name of the traefik stack file ; defaults to `docker-stack-traefik.yml`
 
 __Vars__
-- `traefik_stack_url` : URL to get the URL ; default to dockerswarm.rocks url
+- `traefik_stack_url` : URL where to fetch the stack file ; default to dockerswarm.rocks url with ports in host-mode
 - `traefik_network_overlay` : name of the overlay network for traefik ; defaults to `traefik-public` (hardcoded into the dockerswarm.rocks stack file)
 
 Dependencies
@@ -62,3 +62,4 @@ Author Information
 ------------------
 
 Jean-Christophe Montigny ( https://github.com/jcmontigny )
+With basic automation of the instructions at https://dockerswarm.rocks/traefik/ 
