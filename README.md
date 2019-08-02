@@ -24,12 +24,12 @@ Optional variables
 - `traefik_traefik_replica_count` : number of traefik replicas ; defaults to 3
 - `traefik_consul_replica_count` : number of consul replicas ; defaults to 3
 - `traefik_stack_name` : name of the stack to deploy ; defaults to `traefik-consul`
-- `traefik_compose_path` : path to the the compose files ; defaults to `/docker/compose`
-- `traefik_compose_file` : file name of the traefik compose file ; defaults to `docker-compose-traefik.yml`
+- `traefik_stack_path` : path to the the stack files ; defaults to `/docker/stack_files`
+- `traefik_stack_file` : file name of the traefik stack file ; defaults to `docker-stack-traefik.yml`
 
 __Vars__
-- `traefik_compose_url` : URL to get the URL ; default to dockerswarm.rocks url
-- `traefik_network_overlay` : name of the overlay network for traefik ; defaults to `traefik-public` (hardcoded into the dockerswarm.rocks compose file)
+- `traefik_stack_url` : URL to get the URL ; default to dockerswarm.rocks url
+- `traefik_network_overlay` : name of the overlay network for traefik ; defaults to `traefik-public` (hardcoded into the dockerswarm.rocks stack file)
 
 Dependencies
 ------------
@@ -47,6 +47,10 @@ Including an example of how to use your role (for instance, with variables passe
         - jcmontigny.ansible_traefik
       vars:
         - traefik_swarm_managers_ansible_group: swarm_managers
+        - traefik_letsencrypt_email: mail@example.com
+        - traefik_domain: sys.example.com
+        - traefik_admin_user: admin
+        - traefik_admin_password: changeme
 
 
 License

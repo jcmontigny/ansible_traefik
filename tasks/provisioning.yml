@@ -1,9 +1,9 @@
 ---
 # tasks file for ansible_traefik - provisioning
 
-- name: Create folder for compose files
+- name: Create folder for stack files
   file: 
-    path: "{{ traefik_compose_path }}"
+    path: "{{ traefik_stack_path }}"
     state: directory
     recurse: yes
     owner: "root"

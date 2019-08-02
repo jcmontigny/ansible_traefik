@@ -21,17 +21,17 @@
 
 # Admin user name to access traefik and consul (basic http auth)
 traefik_admin_user: admin
-traefik_admin_password: _changeme_
+traefik_admin_password: changeme
 
 # Number of traefik and consul replicas
 traefik_traefik_replica_count: 3
 traefik_consul_replica_count: 3
 
-# Path to downloaded compose files
-traefik_compose_path: /docker/compose_files
+# Path to downloaded stack files
+traefik_stack_path: /docker/stack_files
 
-# Name of the traefik compose file
-traefik_compose_file: docker-compose-traefik.yml
+# Name of the traefik stack file
+traefik_stack_file: docker-stack-traefik.yml
 
 # Name of the overlay network for traefik
 traefik_network_overlay: traefik-public

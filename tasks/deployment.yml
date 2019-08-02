@@ -1,11 +1,11 @@
 ---
 # tasks file for ansible_traefik - deployment
 
-- name: Download the docker-compose stack to the first manager node
+- name: Download the docker stack file to the first manager node
   get_url:
-    url: "{{ traefik_compose_url }}"
-    dest: "{{ traefik_compose_path }}/{{ traefik_compose_file }}"
-    mode: '0440'
+    url: "{{ traefik_stack_url }}"
+    dest: "{{ traefik_stack_path }}/{{ traefik_stack_file }}"
+    mode: '0664'
 
 - name: Register the list of existing overlay networks
   command: docker network ls --filter 'driver=overlay'
@@ -25,13 +25,13 @@
   set_fact:
     traefik_hashed_password: traefik_hashed_password_output.stdout
 
-- name: Register the list of existing stacks
-  command: docker stack ls
-  changed_when: False
-  register: traefik_swarm_stacks
+# - name: Register the list of existing stacks
+#   command: docker stack ls
+#   changed_when: False
+#   register: traefik_swarm_stacks
 
 - name: Deploy traefik stack 
-  command: "docker stack deploy -c {{ traefik_compose_path }}/{{ traefik_compose_file }} {{ traefik_stack_name }}"
+  command: "docker stack deploy -c {{ traefik_stack_path }}/{{ traefik_stack_file }} {{ traefik_stack_name }}"
   environment:
     - EMAIL: "{{ traefik_letsencrypt_email }}"
     - DOMAIN: "{{ traefik_domain }}"
@@ -40,5 +40,5 @@
     - HASHED_PASSWORD: "{{ traefik_hashed_password }}"
     - CONSUL_REPLICAS: "{{ traefik_traefik_replica_count }}"
     - TRAEFIK_REPLICAS: "{{ traefik_consul_replica_count }}"
-  when: "traefik_swarm_stacks.stdout.find(traefik_stack_name) == -1"
+#   when: "traefik_swarm_stacks.stdout.find(traefik_stack_name) == -1"
   
