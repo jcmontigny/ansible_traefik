@@ -19,6 +19,8 @@
 # --------------------------------------
 # OPTIONAL VARIABLES WITH DEFAULT VALUES
 
+traefik_version: v1.7
+
 # Admin user name to access traefik and consul (basic http auth)
 traefik_admin_user: admin
 traefik_admin_password: changeme

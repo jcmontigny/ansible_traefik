@@ -1,11 +1,19 @@
 ---
 # tasks file for ansible_traefik - deployment
 
-- name: Download the docker stack file to the first manager node
-  get_url:
-    url: "{{ traefik_stack_url }}"
+# - name: Download the docker stack file to the first manager node
+#   get_url:
+#     url: "{{ traefik_stack_url }}"
+#     dest: "{{ traefik_stack_path }}/{{ traefik_stack_file }}"
+#     mode: '0664'
+
+- name: Template the docker stack file to the first manager node
+  template:
+    src: traefik-host.yml
     dest: "{{ traefik_stack_path }}/{{ traefik_stack_file }}"
     mode: '0664'
+    owner: root
+    group: root
 
 - name: Register the list of existing overlay networks
   command: docker network ls --filter 'driver=overlay'
