@@ -23,7 +23,7 @@
 
 - name: Set fact with the username hashed password
   set_fact:
-    traefik_hashed_password: traefik_hashed_password_output.stdout
+    traefik_hashed_password: "{{ traefik_hashed_password_output.stdout }}"
 
 - name: Deploy traefik stack 
   command: "docker stack deploy -c {{ traefik_stack_path }}/{{ traefik_stack_file }} {{ traefik_stack_name }}"
