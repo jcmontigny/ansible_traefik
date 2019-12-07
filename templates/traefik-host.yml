@@ -25,8 +25,8 @@ services:
         - "traefik.http.routers.consul-dashboard.tls.certresolver=letsencryptresolver"
         - "traefik.http.services.consul-dashboard.loadbalancer.server.port=8500"
         - "traefik.http.routers.consul-dashboard.middlewares: consul-auth@docker"
-        - "traefik.http.middlewares.consul-auth.basicauth.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set}"
-        - "traefik.http.middlewares.consul-auth.basicauth.realm=consul"
+        #- "traefik.http.middlewares.consul-auth.basicauth.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set}"
+        #- "traefik.http.middlewares.consul-auth.basicauth.realm=consul"
 
         # V1.7 configuration
         # - traefik.frontend.rule=Host:consul.${DOMAIN?Variable DOMAIN not set} # found equivalent in v2.1
