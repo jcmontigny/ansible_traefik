@@ -128,7 +128,7 @@ services:
       - "--certificatesresolvers.letsencryptresolver.acme.email=${EMAIL?Variable EMAIL not set}" # v1.7 : --acme.email=${EMAIL?Variable EMAIL not set}
       #- "--certificatesresolvers.letsencryptresolver.acme.storage=traefik/acme/account" # v1.7 : --acme.storage="traefik/acme/account" 
       # ACME support using a local file instead of a kv backend.
-       - "--certificatesresolvers.letsencryptresolver.acme.storage=/letsencrypt/acme.json" # v1.7 : --acme.storage="/letsencrypt/acme.json" 
+      - "--certificatesresolvers.letsencryptresolver.acme.storage=/letsencrypt/acme.json" # v1.7 : --acme.storage="/letsencrypt/acme.json" 
 
       # Consul Provider
       - "--providers.consulcatalog=true"  # 1.7 : --consul
