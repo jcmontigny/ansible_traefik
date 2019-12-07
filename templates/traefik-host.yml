@@ -105,8 +105,8 @@ services:
         # - traefik.webservice.frontend.entryPoints=https
         # - traefik.frontend.auth.basic.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set} # found equivalent in v2.1
     volumes:
-      # To persist certificates (when NOT using a consul kv backend)
-       - traefik-certificates:/letsencrypt
+      # ACME support using a local file instead of a kv backend.
+      - traefik-certificates:/letsencrypt
       # Synchronize time with host
       - /etc/localtime:/etc/localtime:ro
       # So that Traefik can listen to the Docker events
@@ -176,6 +176,8 @@ services:
 volumes:
   consul-data-leader:
   consul-data-replica:
+  # ACME support using a local file instead of a kv backend.
+  traefik-certificates:
 
 networks:
   {{ traefik_network_overlay }}:
