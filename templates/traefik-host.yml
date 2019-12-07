@@ -80,8 +80,8 @@ services:
         - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${DOMAIN?Variable DOMAIN not set}`)"
         - "traefik.http.routers.traefik-dashboard.entrypoints=web-secure"
         - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencryptresolver"
-        #- "traefik.http.routers.traefik-dashboard.middlewares: admin"
-        #- "traefik.http.routers.traefik-dashboard.service: api@internal"
+        - "traefik.http.routers.traefik-dashboard.middlewares: traefik-auth"
+        - "traefik.http.routers.traefik-dashboard.service: api@internal"
         - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080"
         - "traefik.http.middlewares.traefik-auth.basicauth.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set}"
 
@@ -138,8 +138,9 @@ services:
       # --entryPoints.web.forwardedHeaders.trustedIPs=127.0.0.1/32,192.168.1.7
       # --entryPoints.web-secure.forwardedHeaders.trustedIPs=127.0.0.1/32,192.168.1.7
 
-      # API
+      # API and dashboard
       - "--api=true" # 1.7 : --api
+      - "--api.dashboard=true"
 
       # Provides access log
       - "--accessLog"
