@@ -80,8 +80,8 @@ services:
         - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${DOMAIN?Variable DOMAIN not set}`)"
         - "traefik.http.routers.traefik-dashboard.entrypoints=web-secure"
         - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencryptresolver"
-        - "traefik.http.routers.traefik-dashboard.middlewares: admin"
-        - "traefik.http.routers.traefik-dashboard.service: api@internal"
+        #- "traefik.http.routers.traefik-dashboard.middlewares: admin"
+        #- "traefik.http.routers.traefik-dashboard.service: api@internal"
         - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080"
         - "traefik.http.middlewares.traefik-auth.basicauth.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set}"
 
@@ -106,7 +106,7 @@ services:
         # - traefik.frontend.auth.basic.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set} # found equivalent in v2.1
     volumes:
       # To persist certificates (when NOT using a consul kv backend)
-      # - traefik-certificates:/letsencrypt
+       - traefik-certificates:/letsencrypt
       # Synchronize time with host
       - /etc/localtime:/etc/localtime:ro
       # So that Traefik can listen to the Docker events
@@ -126,9 +126,9 @@ services:
       - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge=true" # v1.7 : --acme
       - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge.entrypoint=web" # v1.7 : --acme.httpChallenge.entryPoint=http
       - "--certificatesresolvers.letsencryptresolver.acme.email=${EMAIL?Variable EMAIL not set}" # v1.7 : --acme.email=${EMAIL?Variable EMAIL not set}
-      - "--certificatesresolvers.letsencryptresolver.acme.storage=traefik/acme/account" # v1.7 : --acme.storage="traefik/acme/account" 
+      #- "--certificatesresolvers.letsencryptresolver.acme.storage=traefik/acme/account" # v1.7 : --acme.storage="traefik/acme/account" 
       # ACME support using a local file instead of a kv backend.
-      # - "--certificatesresolvers.letsencryptresolver.acme.storage=/letsencrypt/acme.json" # v1.7 : --acme.storage="/letsencrypt/acme.json" 
+       - "--certificatesresolvers.letsencryptresolver.acme.storage=/letsencrypt/acme.json" # v1.7 : --acme.storage="/letsencrypt/acme.json" 
 
       # Consul Provider
       - "--providers.consulcatalog=true"  # 1.7 : --consul
