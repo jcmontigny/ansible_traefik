@@ -14,17 +14,28 @@ services:
       - traefik-public
     deploy:
       labels:
-        - traefik.frontend.rule=Host:consul.${DOMAIN?Variable DOMAIN not set}
-        - traefik.enable=true
-        - traefik.port=8500
-        - traefik.tags=${TRAEFIK_PUBLIC_TAG:-traefik-public}
-        - traefik.docker.network=traefik-public
-        # Traefik service that listens to HTTP
-        - traefik.redirectorservice.frontend.entryPoints=http
-        - traefik.redirectorservice.frontend.redirect.entryPoint=https
-        # Traefik service that listens to HTTPS
-        - traefik.webservice.frontend.entryPoints=https
-        - traefik.frontend.auth.basic.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set}
+        # V2.1 minimal 
+        - "traefik.enable=true"
+
+        # V2.1 redirect to consul dashboard
+        - "traefik.http.routers.traefik-dashboard.rule=Host(`consul.${DOMAIN?Variable DOMAIN not set}`)"
+        - "traefik.http.routers.traefik-dashboard.entrypoints=web-secure"
+        - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8500"
+        - "traefik.http.middlewares.auth.basicauth.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set}"
+
+        # V1.7 configuration
+        # - traefik.frontend.rule=Host:consul.${DOMAIN?Variable DOMAIN not set} # found equivalent in v2.1
+        # - traefik.enable=true # found equivalent in v2.1
+        # - traefik.port=8500 # found equivalent in v2.1
+        # - traefik.tags=${TRAEFIK_PUBLIC_TAG:-traefik-public} 
+        # - traefik.docker.network=traefik-public
+        # # Traefik service that listens to HTTP
+        # - traefik.redirectorservice.frontend.entryPoints=http
+        # - traefik.redirectorservice.frontend.redirect.entryPoint=https
+        # # Traefik service that listens to HTTPS
+        # - traefik.webservice.frontend.entryPoints=https
+        # - traefik.frontend.auth.basic.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set} # found equivalent in v2.1
   consul-replica:
     image: consul
     command: agent -server -client=0.0.0.0 -retry-join="consul-leader"
@@ -58,42 +69,93 @@ services:
         preferences:
           - spread: node.id
       labels:
-        - traefik.frontend.rule=Host:traefik.${DOMAIN?Variable DOMAIN not set}
-        - traefik.enable=true
-        - traefik.port=8080
-        - traefik.tags=traefik-public
-        - traefik.docker.network=traefik-public
-        # Traefik service that listens to HTTP
-        - traefik.redirectorservice.frontend.entryPoints=http
-        - traefik.redirectorservice.frontend.redirect.entryPoint=https
-        # Traefik service that listens to HTTPS
-        - traefik.webservice.frontend.entryPoints=https
-        - traefik.frontend.auth.basic.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set}
+        # V2.1 minimal 
+        - "traefik.enable=true"
+
+        # V2.1 redirect to traefik dashboard
+        - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${DOMAIN?Variable DOMAIN not set}`)"
+        - "traefik.http.routers.traefik-dashboard.entrypoints=web-secure"
+        - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencryptresolver"
+        - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080"
+        - "traefik.http.middlewares.auth.basicauth.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set}"
+
+        # V2.1 automatic redirection for all http traffic to https
+        # Unsure if that will break the letsencrypt requests ?
+        - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+        - "traefik.http.routers.http-catchall.entrypoints=web"
+        - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
+        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+        # Former Conf V1.7
+        # - traefik.frontend.rule=Host:traefik.${DOMAIN?Variable DOMAIN not set} # found equivalent in v2.1
+        # - traefik.enable=true # found equivalent in v2.1
+        # - traefik.port=8080 # found equivalent in v2.1
+        # - traefik.tags=traefik-public
+        # - traefik.docker.network=traefik-public
+        # # Traefik service that listens to HTTP
+        # - traefik.redirectorservice.frontend.entryPoints=http
+        # - traefik.redirectorservice.frontend.redirect.entryPoint=https
+        # # Traefik service that listens to HTTPS
+        # - traefik.webservice.frontend.entryPoints=https
+        # - traefik.frontend.auth.basic.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set} # found equivalent in v2.1
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: >
-      --docker
-      --docker.swarmmode
-      --docker.watch
-      --docker.exposedbydefault=false
-      --constraints=tag==traefik-public
-      --entrypoints='Name:http Address::80'
-      --entrypoints='Name:https Address::443 TLS'
-      --consul
-      --consul.endpoint="consul-leader:8500"
-      --acme
-      --acme.email=${EMAIL?Variable EMAIL not set}
-      --acme.storage="traefik/acme/account"
-      --acme.entryPoint=https
-      --acme.httpChallenge.entryPoint=http
-      --acme.onhostrule=true
-      --acme.acmelogging=true
-      --logLevel=INFO
-      --accessLog
-      --api
+      # To persist certificates (when NOT using a consul kv backend)
+      # - traefik-certificates:/letsencrypt
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      # NEW CONF V2.1
+      # Minimal commands for 80 & 443
+      - "--providers.docker=true" # 1.7 : --docker
+      - "--providers.docker.swarmMode=true" # 1.7 : --docker.swarmmode
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock" # 1.7 : no equivalent
+      - "--providers.docker.network={{ traefik_network_overlay }}" # 1.7 : no equivalent
+      - "--providers.docker.exposedByDefault=false" # 1.7 : --docker.exposedbydefault=false
+      - "--entryPoints.web.address=:80" # v1.7 : --entrypoints='Name:http Address::80'
+      - "--entryPoints.web-secure.address=:443" # v1.7 : --entrypoints='Name:https Address::443 TLS'
+
+      # ACME support with let's encrypt
+      - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge=true" # v1.7 : --acme
+      - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge.entrypoint=web" # v1.7 : --acme.httpChallenge.entryPoint=http
+      - "--certificatesresolvers.letsencryptresolver.acme.email=${EMAIL?Variable EMAIL not set}" # v1.7 : --acme.email=${EMAIL?Variable EMAIL not set}
+      - "--certificatesresolvers.letsencryptresolver.acme.storage=traefik/acme/account" # v1.7 : --acme.storage="traefik/acme/account" 
+      # ACME support using a local file instead of a kv backend.
+      # - "--certificatesresolvers.letsencryptresolver.acme.storage=/letsencrypt/acme.json" # v1.7 : --acme.storage="/letsencrypt/acme.json" 
+
+      # Consul Provider
+      - "--providers.consulcatalog=true"  # 1.7 : --consul
+      - "--providers.consulcatalog.endpoint.address=http://consul-leader:8500"  # 1.7 : --consul.endpoint="consul-leader:8500"
+
+      # To be used only if Traefik is behind a proxy or loead balancer.
+      # --entryPoints.web.forwardedHeaders.trustedIPs=127.0.0.1/32,192.168.1.7
+      # --entryPoints.web-secure.forwardedHeaders.trustedIPs=127.0.0.1/32,192.168.1.7
+
+      # API
+      - "--api=true" # 1.7 : --api
+
+      # FORMER CONF V1.7
+      # --docker # found equivalent in v2.1
+      # --docker.swarmmode # found equivalent in v2.1
+      # --docker.watch
+      # --docker.exposedbydefault=false # found equivalent in v2.1
+      # --constraints=tag==traefik-public # 
+      # --entrypoints='Name:http Address::80' # found equivalent in v2.1
+      # --entrypoints='Name:https Address::443 TLS' # found equivalent in v2.1
+      # --consul # found equivalent in v2.1
+      # --consul.endpoint="consul-leader:8500" # found equivalent in v2.1
+      # --acme # found equivalent in v2.1
+      # --acme.email=${EMAIL?Variable EMAIL not set} # found equivalent in v2.1
+      # --acme.storage="traefik/acme/account" # MAYBE found equivalent in v2.1
+      # --acme.entryPoint=https
+      # --acme.httpChallenge.entryPoint=http # found equivalent in v2.1
+      # --acme.onhostrule=true
+      # --acme.acmelogging=true
+      # --logLevel=INFO
+      # --accessLog
+      # --api # found equivalent in v2.1
     networks:
       - default
-      - traefik-public
+      - {{ traefik_network_overlay }}
     depends_on:
       - consul-leader
         
@@ -102,5 +164,5 @@ volumes:
   consul-data-replica:
 
 networks:
-  traefik-public:
+  {{ traefik_network_overlay }}:
     external: true
