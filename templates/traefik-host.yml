@@ -5,6 +5,8 @@ services:
     image: consul
     command: agent -server -client=0.0.0.0 -bootstrap -ui
     volumes:
+      # Synchronize time with host
+      - /etc/localtime:/etc/localtime:ro    
       - consul-data-leader:/consul/data
     environment:
       - CONSUL_BIND_INTERFACE=eth0
@@ -40,6 +42,8 @@ services:
     image: consul
     command: agent -server -client=0.0.0.0 -retry-join="consul-leader"
     volumes:
+      # Synchronize time with host
+      - /etc/localtime:/etc/localtime:ro
       - consul-data-replica:/consul/data
     environment:
       - CONSUL_BIND_INTERFACE=eth0
@@ -76,6 +80,8 @@ services:
         - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${DOMAIN?Variable DOMAIN not set}`)"
         - "traefik.http.routers.traefik-dashboard.entrypoints=web-secure"
         - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.traefik-dashboard.middlewares: admin"
+        - "traefik.http.routers.traefik-dashboard.service: api@internal"
         - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080"
         - "traefik.http.middlewares.traefik-auth.basicauth.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set}"
 
@@ -101,6 +107,8 @@ services:
     volumes:
       # To persist certificates (when NOT using a consul kv backend)
       # - traefik-certificates:/letsencrypt
+      # Synchronize time with host
+      - /etc/localtime:/etc/localtime:ro
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock:ro
     command:
@@ -133,6 +141,12 @@ services:
       # API
       - "--api=true" # 1.7 : --api
 
+      # Provides access log
+      - "--accessLog"
+
+      # Log level
+      - "--log.level=INFO"
+
       # FORMER CONF V1.7
       # --docker # found equivalent in v2.1
       # --docker.swarmmode # found equivalent in v2.1
@@ -150,8 +164,8 @@ services:
       # --acme.httpChallenge.entryPoint=http # found equivalent in v2.1
       # --acme.onhostrule=true
       # --acme.acmelogging=true
-      # --logLevel=INFO
-      # --accessLog
+      # --logLevel=INFO # found equivalent in v2.1
+      # --accessLog # found equivalent in v2.1
       # --api # found equivalent in v2.1
     networks:
       - default
