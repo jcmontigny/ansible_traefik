@@ -24,6 +24,7 @@ services:
         - "traefik.http.routers.consul-dashboard.entrypoints=web-secure"
         - "traefik.http.routers.consul-dashboard.tls.certresolver=letsencryptresolver"
         - "traefik.http.services.consul-dashboard.loadbalancer.server.port=8500"
+        - "traefik.http.routers.consul-dashboard.middlewares: consul-auth"
         - "traefik.http.middlewares.consul-auth.basicauth.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set}"
 
         # V1.7 configuration
@@ -77,13 +78,13 @@ services:
         - "traefik.enable=true"
 
         # V2.1 redirect to traefik dashboard
-        - "traefik.http.routers.api.rule=Host(`traefik.${DOMAIN?Variable DOMAIN not set}`)"
-        - "traefik.http.routers.api.entrypoints=web-secure"
-        - "traefik.http.routers.api.tls.certresolver=letsencryptresolver"
-        - "traefik.http.routers.api.middlewares: auth"
-        - "traefik.http.routers.api.service: api@internal"
-        - "traefik.http.services.api.loadbalancer.server.port=8080"
-        - "traefik.http.middlewares.auth.basicauth.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set}"
+        - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${DOMAIN?Variable DOMAIN not set}`)"
+        - "traefik.http.routers.traefik-dashboard.entrypoints=web-secure"
+        - "traefik.http.routers.traefik-dashboard.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.traefik-dashboard.middlewares: traefik-auth"
+        - "traefik.http.routers.traefik-dashboard.service: api@internal"
+        - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080"
+        - "traefik.http.middlewares.traefik-auth.basicauth.users=${USERNAME?Variable USERNAME not set}:${HASHED_PASSWORD?Variable HASHED_PASSWORD not set}"
 
         # V2.1 automatic redirection for all http traffic to https
         # Unsure if that will break the letsencrypt requests ?
